@@ -3,9 +3,15 @@ package org.usfirst.frc.team5822.robot;
 import java.time.Instant;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.PIDSource;
+import edu.wpi.first.wpilibj.PIDSourceType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.tables.ITableListener;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -21,11 +27,38 @@ public class Robot extends IterativeRobot
 	double distance = 0; 
 	double center = 0; 
 	double lag = 0; 
+	double start; 
+	
+	ITableListener_WB piListen = new ITableListener_WB(); 
+	Timer teleTimer; 
+	boolean first; 
+	String turnFromTable;
+	double centerOff; 
+	double distanceFromTable; 
+	
+	SICPRobotDrive myRobot; 	
+	
+	PIDController camPID; 
+	CamPIDOutput camOut; 
+	CamPIDSource camSource;
+	double kP, kI, kD; 
+	
 	
 	@Override
 	public void robotInit() 
 	{
+		piTable.setServerMode();
 		piTable = NetworkTable.getTable("piTable"); 
+		NetworkTable.setUpdateRate(0.01);
+		myRobot = new SICPRobotDrive (0,1,2,3); 
+		kP = .02; 
+		kI = 0; 
+		kD = 0; 
+		camOut = new CamPIDOutput();
+		camSource = new CamPIDSource();
+		camPID = new PIDController(kP, kI, kD, camSource, camOut, 0.001); 
+	
+				
 	}
 
 	/**
@@ -48,26 +81,79 @@ public class Robot extends IterativeRobot
 	 * This function is called periodically during autonomous
 	 */
 	@Override
-	public void autonomousPeriodic() {
+	public void autonomousPeriodic() 
+	{
+		
 	}
+	
 	/**
 	 * This function is called periodically during operator control
 	 */
 	@Override
+	public void teleopInit() 
+	{ 
+		teleTimer = new Timer(); 
+		teleTimer.start(); 
+		first = true; 
+		piListen.setCount(0);
+		piTable.addTableListener(piListen, true); 
+		camPID.enable();
+		
+	}
+	@Override
 	public void teleopPeriodic() 
 	{
-		distance = piTable.getNumber("Distance", 0); 
-		center = piTable.getNumber("Center", 0);
-		lag = Instant.now().toEpochMilli() - piTable.getNumber("Start Time", 0); 
-		System.out.println("Distance: " + distance + "; Center: " + center + "; Lag: " + lag);
-		piTable.putNumber("Rio Time", Instant.now().toEpochMilli()); 
+		
+		turnFromTable = piTable.getString("Suggested Turn", "NO VALUE");
+		distanceFromTable = piTable.getNumber("Distance", 0);
+		System.out.println("Suggested Turn: " + turnFromTable + "; Distance: " + distanceFromTable);
+		
+		
 	}
+	
 
 	/**
 	 * This function is called periodically during test mode
 	 */
 	@Override
 	public void testPeriodic() {
+	}
+	
+	public class CamPIDSource implements PIDSource
+	{
+
+		@Override
+		public void setPIDSourceType(PIDSourceType pidSource) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public PIDSourceType getPIDSourceType() {
+			// TODO Auto-generated method stub
+			return PIDSourceType.kDisplacement;
+		}
+
+		@Override
+		public double pidGet() 
+		{
+			
+			return piTable.getNumber("Center", 0); 
+		}		
+		
+		
+	}
+	
+	public class CamPIDOutput implements PIDOutput
+	{
+
+		@Override
+		public void pidWrite(double output) 
+		{			
+			myRobot.setLeftRightMotorOutputs(-(.25)*output, (.25)*output);
+			System.out.println(output);
+		}
+		
 	}
 }
 
