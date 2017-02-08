@@ -92,21 +92,18 @@ public class Robot extends IterativeRobot
 	@Override
 	public void teleopInit() 
 	{ 
-		teleTimer = new Timer(); 
-		teleTimer.start(); 
-		first = true; 
 		piListen.setCount(0);
-		piTable.addTableListener(piListen, true); 
+		piTable.addTableListener(piListen, true);
 		camPID.enable();
+		myRobot.setSafetyEnabled(false);
 		
 	}
 	@Override
 	public void teleopPeriodic() 
 	{
 		
-		turnFromTable = piTable.getString("Suggested Turn", "NO VALUE");
 		distanceFromTable = piTable.getNumber("Distance", 0);
-		System.out.println("Suggested Turn: " + turnFromTable + "; Distance: " + distanceFromTable);
+		//System.out.println("Distance: " + distanceFromTable);
 		
 		
 	}
@@ -137,7 +134,7 @@ public class Robot extends IterativeRobot
 		@Override
 		public double pidGet() 
 		{
-			
+			//System.out.println("Center From PID Source: " + piTable.getNumber("Center",0));
 			return piTable.getNumber("Center", 0); 
 		}		
 		
@@ -146,12 +143,51 @@ public class Robot extends IterativeRobot
 	
 	public class CamPIDOutput implements PIDOutput
 	{
-
+		double center; 
+		double distance; 
+		double tolerance; 
+		
 		@Override
 		public void pidWrite(double output) 
-		{			
-			myRobot.setLeftRightMotorOutputs(-(.25)*output, (.25)*output);
-			System.out.println(output);
+		{		
+			center = Math.abs(piTable.getNumber("Center",0));
+			distance = piTable.getNumber("Distance",0);
+			tolerance = 25+(2*piTable.getNumber("Width",0)); 
+			System.out.println("TOLERANCE: " +tolerance);
+			/*
+			if (distance>40)
+				myRobot.setLeftRightMotorOutputs(-0.3, -0.3);
+			
+			else if (distance<10)
+				myRobot.setLeftRightMotorOutputs(0.15, 0.15);
+			else 
+				myRobot.setLeftRightMotorOutputs(0, 0);	*/	
+						
+			//System.out.println("Center from PIDOutput: " + center + "; Distance from PIDOutput: " + distance + "; Output from PIDOutput: " +output);			
+			
+			if (10<distance && distance<20)
+				myRobot.setLeftRightMotorOutputs(0, 0);
+			
+			else if (distance>20)
+			{
+				myRobot.setLeftRightMotorOutputs(-.15-(.15*output), -.15+(.15*output));
+				System.out.println("FORWARD!");
+			}
+			
+			else if (distance<10)
+			{
+				myRobot.setLeftRightMotorOutputs(.15, .15);
+				System.out.println("BACKWARD!");
+			}
+			
+						
+			/*else
+			{
+				myRobot.setLeftRightMotorOutputs(-.15-(.25)*output, -.15+(.25)*output);
+				System.out.println("NOT CENTERED: " +output);
+			}*/
+			
+			
 		}
 		
 	}
