@@ -1,6 +1,5 @@
 package org.usfirst.frc.team5822.robot;
 
-
 import java.util.ArrayList;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -14,7 +13,7 @@ import org.opencv.core.Point;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable; 
 
-public class HighGoalTracker1
+public class oldHg
 
 {
 	
@@ -77,10 +76,10 @@ public class HighGoalTracker1
 			capture.read(bgr);
 			//Imgcodecs.imwrite("/home/pi/dev/Vision/PiCode/PiPics/RawImage" + oneCount+".jpg", bgr);
 			Imgproc.cvtColor(bgr, hsvConvert, Imgproc.COLOR_BGR2HSV); //using RGB does not work. MUST use BGR. We are still unsure of the reasons. 
-			Core.inRange(hsvConvert, new Scalar (41, 82, 29), new Scalar (82, 255, 198), hsv); //those two Scalar values are the the max and min HSV values respectively. Those were determined in GRIP. 
+			Core.inRange(hsvConvert, new Scalar (10, 131, 18), new Scalar (112, 255, 140), hsv); //those two Scalar values are the the max and min HSV values respectively. Those were determined in GRIP. 
 			Imgproc.findContours(hsv, contours, mhierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE); //first enum lets you control things about hierarchy, I chose option with no hierarchy 
-			//Imgproc.drawContours(bgr, contours,0,new Scalar (255,0,0),3); 
-			Imgcodecs.imwrite("/home/pi/dev/Vision/PiCode/HighGoalPics/rawImg" + oneCount+".jpg", bgr);
+			//Imgproc.drawContours(bgr, contours,0,new Scalar (0,255,0),1); 
+			Imgcodecs.imwrite("C:/Users/sicp/Desktop/testPictures/rawImg" + oneCount+".jpg", bgr);
 			
 			int idex=0; 
 					
@@ -88,63 +87,37 @@ public class HighGoalTracker1
 			for (idex=0; idex < contours.size(); idex++)
 			{
 				test = contours.get(idex); 
+
 				testArea = Imgproc.contourArea(test); 
 				testRect = Imgproc.boundingRect(test);
 				targetRatio = testRect.height/testRect.width; 
-				
 				if (targetRatio <= 1 && testArea>50)
 				{
-					System.out.println("ONE CONTOUR PASSED!"); 
-					Imgproc.rectangle(bgr, new Point(testRect.x, testRect.y), new Point(testRect.x+testRect.width, testRect.y+testRect.height), new Scalar(255,0,0), 2);
-					
-					for (int inc = 0; inc < contours.size(); inc++) 
+					for (int inc=idex; inc<(contours.size()-idex); inc++)
 					{
-						if (inc == idex)
-							continue; 
 						test2 = contours.get(inc); 
 						testArea2 = Imgproc.contourArea(test2); 
 						testRect2 = Imgproc.boundingRect(test2);
 						targetRatio2 = testRect2.height/testRect2.width; 
-						double tripleH = testRect2.height*2.5; 
+						double tripleH = testRect2.height*3; 
 						double threeHalveH = testRect2.height*1.5; 
 						
-						//TODO: I made this restraints less stingy 
-						if (targetRatio2 <=1 
-                                                    && testArea2>50 
-						    && testRect.height < tripleH 
-						    && testRect.height > threeHalveH 
-						    && testRect2.y < (testRect.y+(3*testRect.height))
-						    && testRect2.y > (testRect.y+testRect.height) 
-						)
-
+						if (targetRatio2 <=1 && testArea2 >50 && testRect.height > threeHalveH && testRect.height < tripleH && testRect.y > (testRect2.y+threeHalveH) && testRect.y < (testRect2.y+tripleH))
 						{
-														
-							System.out.println("TWO CONTOURS PASSED!"); 
-							System.out.println("WIDTH OF TOP CONTOUR: " + testRect.width);
-							distance = findDistance(testRect);
-							System.out.println("DISTANCE TO CONTOURS: " + distance); 
-							//System.out.println("Height of TestRect: " + testRect.height); 
-							//System.out.println("Height of TestRect2: " + testRect2.height); 
-							//System.out.println("Height of TestRect Y Coordinate: " + testRect.y); 
-							//System.out.println("Height of TestRect2 Y Coordinate: " + testRect2.y); 
 							bestContour = test; 
 							bestArea = testArea; 
 							bestCIndex = idex;
 							bestRect = testRect; 
 							
-							Imgproc.rectangle(bgr, new Point(testRect.x, testRect.y), new Point(testRect.x+testRect.width, testRect.y+testRect.height), new Scalar(0,255,0), 7);
-							Imgproc.rectangle(bgr, new Point(testRect2.x, testRect2.y), new Point(testRect2.x+testRect2.width, testRect2.y+testRect2.height), new Scalar(0,0,255), 3);
+							Imgproc.rectangle(bgr, new Point(testRect.x, testRect.y), new Point(testRect.x+testRect.width, testRect.y+testRect.height), new Scalar(0,0,255), 3);
+							Imgproc.rectangle(bgr, new Point(testRect2.x, testRect2.y), new Point(testRect2.x+testRect2.width, testRect2.y+testRect2.height), new Scalar(255,0,0), 3);
 							foundPair = true; 
 							break; 
 						}
 						
-						 
-						
 						if (foundPair)
 							break; 
 					}	 
-				if (foundPair)
-					break; 
 					
 				}
 			}
@@ -169,7 +142,7 @@ public class HighGoalTracker1
 				piVals.putNumber("Width", 0); 
 			}
 										
-			Imgcodecs.imwrite("/home/pi/dev/Vision/PiCode/HighGoalPics/outputFrom" + oneCount+".jpg", bgr);
+			Imgcodecs.imwrite("C:/Users/sicp/Desktop/testPictures/filteredImg" + oneCount+".jpg", bgr);
 			oneCount++; 
 		}	
 		
@@ -179,7 +152,7 @@ public class HighGoalTracker1
 	
 	public static double findDistance (Rect rect)
 	{
-		return (1000/rect.width)*4.2241;
+		return ((0.1666666667*320)/(2*rect.width*0.38901939)); // d = TftFOVpx/2TpxtanO, calculated angle was 21.257
 	}
 
 }

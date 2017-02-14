@@ -21,7 +21,7 @@ import org.opencv.core.Point;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable; 
 
-public class PegTracker0204
+public class oldPegTracker
 
 {
 	
@@ -52,9 +52,7 @@ public class PegTracker0204
 		MatOfPoint test = new MatOfPoint(); 
 		ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		ArrayList<MatOfPoint> finalContours = new ArrayList<MatOfPoint>();
-		MatOfPoint biggest = null; 
 		Mat mhierarchy = new Mat(); //have no clue why hierarchy is needed. Still need to figure this one out. 
-		double centerX; 
 		double distance;
 		double targetRatio = 0; 
 		double centerPixel = 0; 
@@ -85,8 +83,7 @@ public class PegTracker0204
 			Imgproc.drawContours(bgr, contours,0,new Scalar (0,255,0),1); 
 			
 			int idex=0; 
-			int size = contours.size();
-			
+					
 			//find the largest contour with geometric similarity to target 
 			for (idex=0; idex < contours.size(); idex++)
 			{
