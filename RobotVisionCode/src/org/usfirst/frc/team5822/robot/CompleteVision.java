@@ -61,7 +61,7 @@ public class CompleteVision
 			{
 				System.out.println("TRIAL NUMBER " + oneCount); 
 
-				if (piVals.getBoolean("High Goal Vision", false))
+				if (piVals.getBoolean("HGVision Enabled", false))
 				{
 					//reset variables
 					contours.clear(); 
@@ -166,9 +166,9 @@ public class CompleteVision
 					
 					else
 					{
-						piVals.putNumber("Center", 0); 
-						piVals.putNumber("Distance", 0); 
-						piVals.putNumber("Width", 0); 
+						piVals.putNumber("Center HG", 0); 
+						piVals.putNumber("Distance HG", 0); 
+						piVals.putNumber("Width HG", 0); 
 						piVals.putBoolean("HGVision from Pi", true); 
 					}
 												
@@ -176,7 +176,7 @@ public class CompleteVision
 					oneCount++; 
 				}	
 				
-				if (piVals.getBoolean("Gear Vision", false))
+				if (piVals.getBoolean("Gear Vision Enabled", false))
 				{
 					System.out.println("TRIAL NUMBER " + oneCount); 
 
@@ -288,9 +288,9 @@ public class CompleteVision
 						distance = 0; 
 					}
 					
-					piVals.putNumber("Center", centerPixel); 
-					piVals.putNumber("Distance", distance); 
-					piVals.putNumber("Width", bestRect.width); 
+					piVals.putNumber("Center Gear", centerPixel); 
+					piVals.putNumber("Distance Gear", distance); 
+					piVals.putNumber("Width Gear", bestRect.width); 
 					System.out.println("CENTER: " + centerPixel); 
 					piVals.putBoolean("Gear Vision from Pi", true); 
 					

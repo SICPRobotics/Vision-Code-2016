@@ -176,9 +176,9 @@ public class PegTracker0204
 				distance = 0; 
 			}
 			
-			piVals.putNumber("Center", centerPixel); 
-			piVals.putNumber("Distance", distance); 
-			piVals.putNumber("Width", bestRect.width); 
+			piVals.putNumber("Center Gear", centerPixel); 
+			piVals.putNumber("Distance Gear", distance); 
+			piVals.putNumber("Width Gear", bestRect.width); 
 			System.out.println("CENTER: " + centerPixel); 
 			
 			if(bestRect != null) Imgproc.rectangle(bgr, new Point(bestRect.x, bestRect.y), new Point(bestRect.x+bestRect.width, bestRect.y+bestRect.height), new Scalar(255,0,0), 3);

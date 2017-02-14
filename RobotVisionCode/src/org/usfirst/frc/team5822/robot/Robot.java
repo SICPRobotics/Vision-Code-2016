@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -42,7 +43,7 @@ public class Robot extends IterativeRobot
 	CamPIDOutput camOut; 
 	CamPIDSource camSource;
 	double kP, kI, kD; 
-	
+	XboxController xbox; 
 	
 	@Override
 	public void robotInit() 
@@ -57,6 +58,7 @@ public class Robot extends IterativeRobot
 		camOut = new CamPIDOutput();
 		camSource = new CamPIDSource();
 		camPID = new PIDController(kP, kI, kD, camSource, camOut, 0.001); 
+		xbox = new XboxController(1);
 	
 				
 	}
@@ -94,7 +96,9 @@ public class Robot extends IterativeRobot
 	{ 
 		piListen.setCount(0);
 		piTable.addTableListener(piListen, true);
-		camPID.enable();
+		
+		//TODO: this line enables the code that lets it line up off the gear 
+		//camPID.enable();
 		myRobot.setSafetyEnabled(false);
 		
 	}
@@ -102,7 +106,44 @@ public class Robot extends IterativeRobot
 	public void teleopPeriodic() 
 	{
 		
-		distanceFromTable = piTable.getNumber("Distance", 0);
+		if (xbox.getRawButton(1))
+		{
+			piTable.putBoolean("HGVision Enabled", true); 
+			piTable.putBoolean("Gear Vision Enabled", false); 
+		}
+		
+		else if (xbox.getRawButton(2))
+		{
+			piTable.putBoolean("HGVision Enabled", false); 
+			piTable.putBoolean("Gear Vision Enabled", true); 
+		}
+		
+		else 
+		{
+			piTable.putBoolean("HGVision Enabled", false); 
+			piTable.putBoolean("Gear Vision Enabled", false); 
+		
+		}
+		
+		if (piTable.getBoolean("HGVision from Pi", false))
+		{
+			System.out.println("CENTER OF HG: " + piTable.getNumber("Center HG", 0)); 
+			System.out.println("DISTANCE TO HG: " + piTable.getNumber("Distance HG", 0)); 
+			System.out.println("WIDTH OF HG: " + piTable.getNumber("Width HG", 0)); 
+			
+		}
+		
+		else if (piTable.getBoolean("Gear Vision from Pi", false))
+		{
+			System.out.println("CENTER OF GEAR: " + piTable.getNumber("Center Gear", 0)); 
+			System.out.println("DISTANCE TO GEAR: " + piTable.getNumber("Distance Gear", 0)); 
+			System.out.println("WIDTH OF GEAR: " + piTable.getNumber("Width Gear", 0)); 
+			
+		}
+		
+	
+		
+		//distanceFromTable = piTable.getNumber("Distance", 0);
 		//System.out.println("Distance: " + distanceFromTable);
 		
 		
