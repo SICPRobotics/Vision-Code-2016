@@ -39,10 +39,16 @@ public class Robot extends IterativeRobot
 	
 	SICPRobotDrive myRobot; 	
 	
-	PIDController camPID; 
-	CamPIDOutput camOut; 
-	CamPIDSource camSource;
-	double kP, kI, kD; 
+	PIDController gearPID; 
+	GearCamPIDOutput GearcamOut; 
+	GearCamPIDSource camSource;
+	double kPg, kIg, kDg; 
+	
+	PIDController hgPID; 
+	GearCamPIDOutput hgcamOut; 
+	GearCamPIDSource hgcamSource;
+	double kPhg, kIhg, kDhg; 
+	
 	XboxController xbox;
 	
 	boolean gearVision, hGVision; 
@@ -56,20 +62,23 @@ public class Robot extends IterativeRobot
 		piTable = NetworkTable.getTable("piTable"); 
 		NetworkTable.setUpdateRate(0.01);
 		myRobot = new SICPRobotDrive (0,1,2,3); 
-		kP = .02; 
-		kI = 0; 
-		kD = 0; 
-		camOut = new CamPIDOutput();
-		camSource = new CamPIDSource();
-		camPID = new PIDController(kP, kI, kD, camSource, camOut, 0.001); 
+		kPg = .02; 
+		kIg = 0; 
+		kDg = 0; 
+		GearcamOut = new GearCamPIDOutput();
+		camSource = new GearCamPIDSource();
+		gearPID = new PIDController(kPg, kIg, kDg, camSource, GearcamOut, 0.001); 
+		
+		hgcamOut = new GearCamPIDOutput();
+		hgcamSource = new GearCamPIDSource();
+		hgPID = new PIDController(kPhg, kIhg, kDhg, hgcamSource, hgcamOut, 0.001); 
+		
 		xbox = new XboxController(1);
 		noVision = true; 
-		
-	
-	
-				
+					
 	}
 
+	
 	/**
 	 * This autonomous (along with the chooser code above) shows how to select
 	 * between different autonomous modes using the dashboard. The sendable
@@ -192,7 +201,7 @@ public class Robot extends IterativeRobot
 	public void testPeriodic() {
 	}
 	
-	public class CamPIDSource implements PIDSource
+	public class HighGoalCamPIDSource implements PIDSource
 	{
 
 		@Override
@@ -211,13 +220,60 @@ public class Robot extends IterativeRobot
 		public double pidGet() 
 		{
 			//System.out.println("Center From PID Source: " + piTable.getNumber("Center",0));
-			return piTable.getNumber("Center", 0); 
+			return piTable.getNumber("Center HG", 0); 
 		}		
 		
 		
 	}
 	
-	public class CamPIDOutput implements PIDOutput
+	public class HGCamPIDOutput implements PIDOutput
+	{
+		double center; 
+		double tolerance; 
+		
+		@Override
+		public void pidWrite(double output) 
+		{		
+			center = Math.abs(piTable.getNumber("Center HG",0));
+			tolerance = (1000/piTable.getNumber("Width HG", 1)); 
+			
+			if (-tolerance<=center && center<=tolerance)
+				myRobot.setLeftRightMotorOutputs(0, 0);
+		
+			else 
+				myRobot.setLeftRightMotorOutputs(-.15-(.15*output), -.15+(.15*output));
+						
+		
+		}
+		
+	}
+	
+	public class GearCamPIDSource implements PIDSource
+	{
+
+		@Override
+		public void setPIDSourceType(PIDSourceType pidSource) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public PIDSourceType getPIDSourceType() {
+			// TODO Auto-generated method stub
+			return PIDSourceType.kDisplacement;
+		}
+
+		@Override
+		public double pidGet() 
+		{
+			//System.out.println("Center From PID Source: " + piTable.getNumber("Center",0));
+			return piTable.getNumber("Center Gear", 0); 
+		}		
+		
+		
+	}
+	
+	public class GearCamPIDOutput implements PIDOutput
 	{
 		double center; 
 		double distance; 
@@ -226,10 +282,11 @@ public class Robot extends IterativeRobot
 		@Override
 		public void pidWrite(double output) 
 		{		
-			center = Math.abs(piTable.getNumber("Center",0));
-			distance = piTable.getNumber("Distance",0);
-			tolerance = 25+(2*piTable.getNumber("Width",0)); 
-			System.out.println("TOLERANCE: " +tolerance);
+			center = Math.abs(piTable.getNumber("Center G",0));
+			distance = piTable.getNumber("Distance G",0);
+			tolerance = 25+(2*piTable.getNumber("Width G",0)); 
+			
+			/*System.out.println("TOLERANCE: " +tolerance);*/
 			/*
 			if (distance>40)
 				myRobot.setLeftRightMotorOutputs(-0.3, -0.3);
