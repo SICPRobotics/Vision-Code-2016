@@ -56,6 +56,7 @@ public class CompleteVision
 			System.out.println("Going to the while"); 
 			int bestCIndex = 0;
 			boolean foundPair;  
+			double width; 
 			
 			while (true)  
 			{
@@ -63,6 +64,8 @@ public class CompleteVision
 
 				if (piVals.getBoolean("HGVision Enabled", false))
 				{
+					piVals.putBoolean("High Goal Vision from Pi", true); 
+
 					//reset variables
 					contours.clear(); 
 					finalContours.clear();
@@ -73,7 +76,7 @@ public class CompleteVision
 					bestArea = 0; 
 					bestContour = null; 
 					bestRect = null; 
-							
+												
 					//find all contours that are within HSV range
 					capture.read(bgr);
 					//Imgcodecs.imwrite("/home/pi/dev/Vision/PiCode/PiPics/RawImage" + oneCount+".jpg", bgr);
@@ -156,21 +159,22 @@ public class CompleteVision
 						contours.remove(bestCIndex); 
 						centerPixel = bestRect.x+(bestRect.width/2); 
 						distance = findDistanceHG(bestRect); 
-						
-						piVals.putNumber("Center", centerPixel); 
-						piVals.putNumber("Distance", distance); 
-						piVals.putNumber("Width", bestRect.width); 
-						piVals.putBoolean("HGVision from Pi", true); 
+						width = bestRect.width; 
 						
 					}
 					
 					else
 					{
-						piVals.putNumber("Center HG", 0); 
-						piVals.putNumber("Distance HG", 0); 
-						piVals.putNumber("Width HG", 0); 
-						piVals.putBoolean("HGVision from Pi", true); 
+						centerPixel = 0; 
+						distance = 0; 
+						width = 0; 
 					}
+					System.out.println("WE GOT TO THIS POINT" + distance); 
+
+					piVals.putNumber("Center HG", centerPixel); 
+					piVals.putNumber("Distance HG", distance); 
+					piVals.putNumber("Width HG", width); 
+			 		System.out.println("WE GOT TO THIS POINT" + piVals.getBoolean("High Goal Vision from Pi", false)); 
 												
 					//Imgcodecs.imwrite("/home/pi/dev/Vision/PiCode/HighGoalPics/outputFromHG" + oneCount+".jpg", bgr);
 					oneCount++; 
@@ -222,6 +226,7 @@ public class CompleteVision
 					{ 
 						bestRect = Imgproc.boundingRect(bestContour); 	
 						contours.remove(bestCIndex); 
+						width = bestRect.width; 
 						
 						//build a bounding box that covers the area we expect to find the other target in 
 						boundMaxX = bestRect.x + (bestRect.width*6); 
@@ -281,16 +286,18 @@ public class CompleteVision
 
 						distance = 12*(findDistanceGear(bestRect)); 
 						System.out.println("DISTANCE: " +distance); 
+					
 					}
 					else 
 					{
 						centerPixel = 0; 
 						distance = 0; 
+						width = 0; 
 					}
 					
 					piVals.putNumber("Center Gear", centerPixel); 
 					piVals.putNumber("Distance Gear", distance); 
-					piVals.putNumber("Width Gear", bestRect.width); 
+					piVals.putNumber("Width Gear", width); 
 					System.out.println("CENTER: " + centerPixel); 
 					piVals.putBoolean("Gear Vision from Pi", true); 
 					
@@ -310,7 +317,7 @@ public class CompleteVision
 				
 				else 
 				{
-					piVals.putBoolean("HGVision from Pi", false); 
+					piVals.putBoolean("High Goal Vision from Pi", false); 
 					piVals.putBoolean("Gear Vision from Pi", false); 
 				}
 				

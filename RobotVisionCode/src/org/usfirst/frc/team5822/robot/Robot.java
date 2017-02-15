@@ -43,7 +43,11 @@ public class Robot extends IterativeRobot
 	CamPIDOutput camOut; 
 	CamPIDSource camSource;
 	double kP, kI, kD; 
-	XboxController xbox; 
+	XboxController xbox;
+	
+	boolean gearVision, hGVision; 
+	boolean onePressed, twoPressed; 
+	boolean noVision; 
 	
 	@Override
 	public void robotInit() 
@@ -59,6 +63,9 @@ public class Robot extends IterativeRobot
 		camSource = new CamPIDSource();
 		camPID = new PIDController(kP, kI, kD, camSource, camOut, 0.001); 
 		xbox = new XboxController(1);
+		noVision = true; 
+		
+	
 	
 				
 	}
@@ -107,25 +114,53 @@ public class Robot extends IterativeRobot
 	{
 		
 		if (xbox.getRawButton(1))
+			onePressed = true; 
+		if (xbox.getRawButton(2))
+			twoPressed = true; 
+		
+		if(onePressed && xbox.getRawButton(1)!=true)
 		{
-			piTable.putBoolean("HGVision Enabled", true); 
-			piTable.putBoolean("Gear Vision Enabled", false); 
+			onePressed = false; 
+			noVision = !noVision; 
+			hGVision = !hGVision;
+			gearVision = false; 
 		}
 		
-		else if (xbox.getRawButton(2))
+		else if (twoPressed && xbox.getRawButton(2)!=true)
 		{
-			piTable.putBoolean("HGVision Enabled", false); 
-			piTable.putBoolean("Gear Vision Enabled", true); 
+			twoPressed = false; 
+			noVision = !noVision ;
+			gearVision = !gearVision; 
+			hGVision = false; 
 		}
 		
-		else 
+		else if (noVision) 
 		{
-			piTable.putBoolean("HGVision Enabled", false); 
-			piTable.putBoolean("Gear Vision Enabled", false); 
+			hGVision = false; 
+			gearVision = false; 
 		
 		}
 		
-		if (piTable.getBoolean("HGVision from Pi", false))
+		piTable.putBoolean("HGVision Enabled", hGVision); 
+		piTable.putBoolean("Gear Vision Enabled", gearVision); 
+		
+		if(hGVision)
+		{
+			System.out.println("HG VISION ENABLED!");
+		}
+		
+		else if(gearVision)
+		{
+			System.out.println("GEAR VISION ENABLED!"); 
+		}
+		
+		else
+			System.out.println("NO VISION ENABLED");
+		
+		System.out.println(piTable.getBoolean("High Goal Vision from Pi", false));
+		System.out.println(piTable.getBoolean("Gear Vision from Pi", false));
+		
+		if (piTable.getBoolean("High Goal Vision from Pi", false))
 		{
 			System.out.println("CENTER OF HG: " + piTable.getNumber("Center HG", 0)); 
 			System.out.println("DISTANCE TO HG: " + piTable.getNumber("Distance HG", 0)); 
