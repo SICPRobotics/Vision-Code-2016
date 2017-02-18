@@ -8,6 +8,7 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -44,6 +45,9 @@ public class Robot extends IterativeRobot {
 	SendableChooser<String> chooseShoot = new SendableChooser<>(); 
 	SendableChooser<String> chooseGear = new SendableChooser<>(); 
 	SendableChooser<String> chooseOrder = new SendableChooser<>(); 
+	
+	Preferences prefs;
+	double topH, topS, topV, bottomH, bottomS, bottomV; 
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -115,6 +119,16 @@ public class Robot extends IterativeRobot {
 		}
 		);
         t.start();
+        
+        prefs = Preferences.getInstance();
+        topH = prefs.getDouble("Top H", 0); 
+        topS = prefs.getDouble("Top S", 0); 
+        topV = prefs.getDouble("Top V", 0);
+        
+        bottomH = prefs.getDouble("Bottom H", 0);
+        bottomS = prefs.getDouble("Bottom S", 0);
+        bottomV = prefs.getDouble("Bottom V", 0);
+        
      }
 
 	/**

@@ -133,6 +133,10 @@ public class Robot extends IterativeRobot
 			noVision = !noVision; 
 			hGVision = !hGVision;
 			gearVision = false; 
+			if(hGVision)
+				hgPID.enable();
+			else
+				hgPID.disable();
 		}
 		
 		else if (twoPressed && xbox.getRawButton(2)!=true)
@@ -141,12 +145,20 @@ public class Robot extends IterativeRobot
 			noVision = !noVision ;
 			gearVision = !gearVision; 
 			hGVision = false; 
+			if (gearVision)
+				gearPID.enable();
+			else
+				gearPID.disable();
 		}
 		
 		else if (noVision) 
 		{
 			hGVision = false; 
 			gearVision = false; 
+			if(hgPID.isEnabled())
+				hgPID.disable();
+			if(gearPID.isEnabled())
+				gearPID.disable();
 		
 		}
 		
